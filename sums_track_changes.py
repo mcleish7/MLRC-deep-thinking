@@ -10,42 +10,39 @@ import json
 import matplotlib.pyplot as plt
 import argparse
 
-def get_net(device, type="prog"):
+def get_net(device, path):
     """
     Returns the DT recall (progressive) network in evaluation mode
 
     Args:
-        type (str, optional): Set to prog if want the progressive recall network. Defaults to "prog".
+        type (str): the file path to the network
         device (str): the device to store the network on
 
     Returns:
         torch.nn: the neural net
     """
-    if type == "prog": 
-        name = "enraged-Jojo" # Jojo => recall, alpha =1 
-    else:
-        name = "peeling-Betzaida" # Betz => recall, alpha =0
-    file = f"batch_shells_sums/outputs/prefix_sums_ablation/training-{name}/model_best.pth"
-
     net = getattr(models, "dt_net_recall_1d")(width=400, in_channels=3, max_iters=30)
-    state_dict = torch.load(file, map_location=device)
+    state_dict = torch.load(path, map_location=device)
     net = net.to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(state_dict["net"])
     net.eval()
     return net
 
-def get_data(device):
+def get_data(device, path, size):
     """
     Gets bit strings of length 48 from the local file and augments them to be the same how the DataLoader would input them
     Args:
         device (str): the device to store the output tensors on
+        path (str): the path to the directoryt that the data is stored in
     Returns:
         input, target (tensor,tensor): the input and taget datasets as tensors on the device passed in
     """
-    data = torch.load("batch_shells_sums/data/prefix_sums_data/48_data.pth").unsqueeze(1) - 0.5
-    target = torch.load("batch_shells_sums/data/prefix_sums_data/48_targets.pth")
-    input = data.to(device, dtype=torch.float) #to account for batching in real net
+    data_path = path + "/" + str(size) + "_data.pth"
+    target_path = path + "/" + str(size) + "_targets.pth"
+    data = torch.load(data_path).unsqueeze(1) - 0.5 #to account for batching and normalisation in real net
+    target = torch.load(target_path)
+    input = data.to(device, dtype=torch.float)
     target = target.to(device, dtype=torch.float)
     return input, target
 
@@ -185,7 +182,6 @@ def track_after_peturb(output,target):
             out.append(gl)
             prev = out[outi-1]
             match = same(gl,target)
-            # change.append(str(outi)+", "+str(first_diff(gl,prev))+", "+str(num_diff(gl,prev))+", "+correct) # string (index after 50, index of first difference, number of differences, if the output is correct)
             first_difference.append(first_diff(gl,prev))
             num_diffences.append(num_diff(gl,prev))
             correct.append(match)
@@ -228,7 +224,7 @@ class custom_func(fault_injection):
             input (tensor): the input to the layer
             output (tensor): the output of the layer
         """
-        if (self.get_current_layer() < 408) and (self.get_current_layer() >= 400):
+        if (self.get_current_layer() < 408) and (self.get_current_layer() >= 400): # there are 8 layers in the recurrent module so we apply the perutbation at each layer for the 50th application of the module
             j = self.j #between 0 and 48
             for i in range(0,output.size(1)):
                 if output[0,i,j] > 0.0:
@@ -309,7 +305,7 @@ def density(num_diffences, correct, input, target):
     if count >0:
         return total/count
     else:
-        #when this prints it is a very rare case where the net recovers in one step
+        #when this prints it is a very rare case where the net recovers in one step from the peturbation
         print("one step recovery")
         print(input)
         print(target)
@@ -319,10 +315,14 @@ def density(num_diffences, correct, input, target):
 
 def main():
     parser = argparse.ArgumentParser(description="Time parser")
-    parser.add_argument("--which_net", type=str, default="prog", help="choose between prog or non-prog, defaults to prog")
+    # e.g."outputs/{batch_name}/training-{model_name}/model_best.pth"
+    parser.add_argument("--net_path", type=str, help="the path to the prefix sums model to undego testing", required=True)
+    # when the prefix sums models were trained the data was automatically downloaded into a "data" file, we want the path to this file including the "data" part
+    # e.g. data
+    parser.add_argument("--data_path", type=str, help="the path to the directory the data to test on is stored in", required=True)
+    parser.add_argument("--size", type=str, help="the size of the bit strings to collect from the data_path directory", required=True)
     args = parser.parse_args()
 
-    os.chdir("/dcs/large/u2004277/deep-thinking/")
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     batch_size = 500
@@ -330,8 +330,8 @@ def main():
     width = 400
     layer_types_input = [torch.nn.Conv1d]
 
-    net = get_net(device, args.which_net)
-    inputs,targets = get_data(device)
+    net = get_net(device, args.net_path)
+    inputs,targets = get_data(device, args.data_path, args.size)
 
     with torch.no_grad(): # we are evaluating so no grad needed
         average_density = [] # store for the averaged values
@@ -354,46 +354,36 @@ def main():
                 density_list.append(density(num_diffences, correct, input, target))
             mean = sum(density_list) / len(density_list)
             average_density.append(mean)
-            file_path = os.path.join("test_time","time_track_out.txt")
-            with open(file_path, 'r+') as f: # storing the data as we do not expect reach the end of the loop in the set runtime
+            file_path = "time_track_out.txt"
+            with open(file_path, 'w+') as f: # storing the data as we do not expect reach the end of the loop in the set runtime
                 f.write(f"for index: {index} density  list is {average_density}\n")
             
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
 
-#All of the output data is stored in text files, I have moved it to here to graph and so it can be seen in its raw format
-# Runs oftern take more than two days, hence the split in the lists
+# Paste the arrays in from the files they are written to and pass them to the graph results method to plot
+# Remember: comment out lines 361 and 362 which call main when graphing to save time
 
-#testing for 1000 iters on jojo => recall, alpha =1 (less hook)
-#for index: 13 density  list is 
-l = [8.350531192150143, 8.836733070870311, 8.15026908322514, 8.169314109471728, 8.120657781738904, 7.8387408047366165, 7.871288398636948, 7.704663253001619, 7.7222812864561, 7.638716922882653, 7.529145282420763, 7.4196367780568195, 7.293277663501195, 7.294934048231607]
+def graph_results(r,rp,tr,trp):
+    """
+    Takes the 4 arrays we generate (time to recover and work done to recover for both prog and non-prog) 
+    and plots both the average work done and total work done by multiplying the two arrays
 
-#testing Betz => recall, alpha =0 10,000 for 38 iters
-# for index: 38 density  list is 
-l1 = [2.894564798436663, 2.742658473504928, 2.9500032091398998, 2.9716900719955452, 2.9626442698783673, 2.9574257539860693, 2.9375175098130635, 2.920897184747449, 2.9207207787799887, 2.906564512562613, 2.9060831001510286, 2.898443841835443, 2.892349929487068, 2.8898419706793708, 2.877596519273487, 2.872609737382494, 2.8692976791230196, 2.863144291075841, 2.847519525391978, 2.8347488911874694, 2.8278018865221695, 2.818073908160802, 2.799248385758665, 2.798484213955967, 2.784911057895057, 2.7677313715197864, 2.759365109638811, 2.7410102599541686, 2.734705311159419, 2.7116538031249826, 2.6936397658142583, 2.667094037196456, 2.6370377826340183, 2.6112972957597895, 2.588518300310813, 2.5570871450771566, 2.508867230824737, 2.467657775280267, 2.415364841269837]
-
-# for index: 37 density  list is 10000 iters on jojo => recall, alpha =1 (less hook)
-l2 = [8.354512728221037, 8.775918890788645, 8.09659367925775, 8.0967221853939, 8.094584859871922, 7.9408257761864585, 7.876619508529945, 7.767930578984392, 7.703758035898553, 7.588311421170889, 7.500024388210057, 7.423071916345686, 7.2917123906094305, 7.2349862306174675, 7.127819093089241, 7.078964323426383, 6.894311736560213, 6.8227387977986975, 6.7258364935176465, 6.661864411857927, 6.537369552611998, 6.424532856816396, 6.343774872921189, 6.217911686573217, 6.185617925407933, 6.065921009888788, 5.961891254578772, 5.868166186868691, 5.769126171051171, 5.638341159673668, 5.557623549228581, 5.444445247807738, 5.340174433621909, 5.199739285714301, 5.069919960317445, 4.906463611111129, 4.743992182539701, 4.593787261904766]
-
-# time to recover data from test_time file:
-
-# Betz data
-#for index: 36 the time array is 
-ttl = [18.1349, 19.907, 24.0738, 25.3438, 25.8389, 25.7408, 25.3065, 24.7848, 24.2047, 23.6946, 23.3269, 22.7508, 22.3547, 21.8837, 21.4098, 20.8964, 20.5066, 20.0099, 19.4742, 18.9723, 18.4464, 18.0089, 17.5026, 16.982, 16.5222, 15.9724, 15.5709, 15.006, 14.4962, 14.0435, 13.5449, 13.0145, 12.4881, 12.0132, 11.5107, 10.98, 10.5114]
-
-# Jojo data
-#for index: 36 the time array is 
-ttj = [17.8872, 19.4591, 19.941, 19.912, 19.8543, 19.2299, 18.8148, 18.4023, 18.0458, 17.6382, 17.1686, 16.7601, 16.27, 15.8989, 15.4843, 15.1598, 14.6714, 14.3212, 13.8789, 13.4322, 13.014, 12.6209, 12.1961, 11.7285, 11.3529, 10.9505, 10.512, 10.1154, 9.707, 9.2398, 8.893, 8.5136, 8.1195, 7.723, 7.3973, 7.024, 6.6765]
-
-mul1 = []
-mul2 = []
-i=0
-while (i<len(l1)) and (i<len(ttl)):
-    mul1.append(l1[i]*ttl[i])
-    i+=1
-i=0
-while (i<len(l2)) and (i<len(ttj)):
-    mul2.append(l2[i]*ttj[i])
-    i+=1
-graph_time(mul1,mul2,gtype="mul")
-graph_time(l1,l2)
+    Args:
+        r (list): The Recall models average number of changes done after a perurbation list created by sums_track_changes.py
+        rp (list): The Recall-Prog models average number of changes done after a perurbation list created by sums_track_changes.py
+        tr (list): The Recall models average time to recover after a peturbation list created by sums_peturb.py
+        trp (list): The Recall-Progs models average time to recover after a peturbation list created by sums_peturb.py
+    """
+    mul1 = []
+    mul2 = []
+    i=0
+    while (i<len(r)) and (i<len(tr)):
+        mul1.append(r[i]*tr[i])
+        i+=1
+    i=0
+    while (i<len(rp)) and (i<len(trp)):
+        mul2.append(rp[i]*trp[i])
+        i+=1
+    graph_time(mul1,mul2,gtype="mul")
+    graph_time(r,rp)

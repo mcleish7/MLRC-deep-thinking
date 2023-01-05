@@ -10,41 +10,38 @@ import json
 import matplotlib.pyplot as plt
 import argparse
 
-def get_net(device, type="prog"):
+def get_net(device, path):
     """
     Returns the DT recall (progressive) network in evaluation mode
 
     Args:
-        type (str, optional): Set to prog if want the progressive recall network. Defaults to "prog".
+        type (str): the file path to the network
         device (str): the device to store the network on
 
     Returns:
         torch.nn: the neural net
     """
-    if type == "prog": 
-        name = "enraged-Jojo" # Jojo => recall, alpha =1 
-    else:
-        name = "peeling-Betzaida" # Betz => recall, alpha =0
-    file = f"batch_shells_sums/outputs/prefix_sums_ablation/training-{name}/model_best.pth"
-
     net = getattr(models, "dt_net_recall_1d")(width=400, in_channels=3, max_iters=30)
-    state_dict = torch.load(file, map_location=device)
+    state_dict = torch.load(path, map_location=device)
     net = net.to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(state_dict["net"])
     net.eval()
     return net
 
-def get_data(device):
+def get_data(device, path, size):
     """
     Gets bit strings of length 48 from the local file and augments them to be the same how the DataLoader would input them
     Args:
         device (str): the device to store the output tensors on
+        path (str): the path to the directoryt that the data is stored in
     Returns:
         input, target (tensor,tensor): the input and taget datasets as tensors on the device passed in
     """
-    data = torch.load("batch_shells_sums/data/prefix_sums_data/48_data.pth").unsqueeze(1) - 0.5
-    target = torch.load("batch_shells_sums/data/prefix_sums_data/48_targets.pth")
+    data_path = path + "/" + str(size) + "_data.pth"
+    target_path = path + "/" + str(size) + "_targets.pth"
+    data = torch.load(data_path).unsqueeze(1) - 0.5 #to account for batching and normalisation in real net
+    target = torch.load(target_path)
     input = data.to(device, dtype=torch.float)
     target = target.to(device, dtype=torch.float)
     return input, target
@@ -201,10 +198,14 @@ def main():
     Runs the peturbation with the input commmand line peratmeter for which net is selected
     """
     parser = argparse.ArgumentParser(description="Time parser")
-    parser.add_argument("--which_net", type=str, default="prog", help="choose between prog or non-prog, defaults to prog")
+    # e.g."outputs/{batch_name}/training-{model_name}/model_best.pth"
+    parser.add_argument("--net_path", type=str, help="the path to the prefix sums model to undego testing", required=True)
+    # when the prefix sums models were trained the data was automatically downloaded into a "data" file, we want the path to this file including the "data" part
+    # e.g. data
+    parser.add_argument("--data_path", type=str, help="the path to the directory the data to test on is stored in", required=True)
+    parser.add_argument("--size", type=str, help="the size of the bit strings to collect from the data_path directory", required=True)
     args = parser.parse_args()
 
-    os.chdir("/dcs/large/u2004277/deep-thinking/") # changing back to the top directory as this method can be called from bash scripts in other directories
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # parameters for pytorchfi model
@@ -213,9 +214,9 @@ def main():
     width = 400
     layer_types_input = [torch.nn.Conv1d]
 
-    net = get_net(device, type = args.which_net)
-    print("now going into loop")
-    inputs,targets = get_data(device)
+    net = get_net(device, args.net_path)
+    inputs,targets = get_data(device, args.data_path, args.size)
+
     with torch.no_grad(): # we are evaluating so no grad needed
         time = [] # store for the averaged values
         for index in range(0,40): # index of which bit is to be changed
@@ -243,40 +244,6 @@ def main():
 if __name__ == "__main__":
     main()
 
-#All of the output data is stored in text files, I have moved it to here to graph and so it can be seen in its raw format
-# Runs oftern take more than two days, hence the split in the lists
-
-# Betz data
-#for index: 36 the time array is 
-l = [18.1349, 19.907, 24.0738, 25.3438, 25.8389, 25.7408, 25.3065, 24.7848, 24.2047, 23.6946, 23.3269, 22.7508, 22.3547, 21.8837, 21.4098, 20.8964, 20.5066, 20.0099, 19.4742, 18.9723, 18.4464, 18.0089, 17.5026, 16.982, 16.5222, 15.9724, 15.5709, 15.006, 14.4962, 14.0435, 13.5449, 13.0145, 12.4881, 12.0132, 11.5107, 10.98, 10.5114]
-# print("l is length ",len(l))
-# for index: 39 the time array is  
-l1 = [9.9924, 9.4904, 8.9798]
-#redoing the first few:
-#for index: 9 the time array is [18.1349, 19.907, 24.0738, 25.3438, 25.8389, 25.7408, 25.3065, 24.7848, 24.2047, 23.6946]
-
-# Jojo data
-# for index: 39 the time array is 
-j = [6.3722, 6.0566, 5.6513]
-#for index: 36 the time array is 
-j1 = [17.8872, 19.4591, 19.941, 19.912, 19.8543, 19.2299, 18.8148, 18.4023, 18.0458, 17.6382, 17.1686, 16.7601, 16.27, 15.8989, 15.4843, 15.1598, 14.6714, 14.3212, 13.8789, 13.4322, 13.014, 12.6209, 12.1961, 11.7285, 11.3529, 10.9505, 10.512, 10.1154, 9.707, 9.2398, 8.893, 8.5136, 8.1195, 7.723, 7.3973, 7.024, 6.6765]
-
-betz = l+l1
-jojo = j1+j
-# graph_time(betz,jojo)
-
-# prog
-# for index: 36 the time array is 
-prog1 = [16.1856, 15.5111, 16.3486, 15.4524, 15.5068, 15.0618, 14.9197, 14.4535, 14.2271, 13.9523, 13.5131, 13.2493, 12.7945, 12.5634, 12.1517, 11.9928, 11.3922, 11.1332, 10.9404, 10.5358, 10.1458, 9.7926, 9.6382, 9.1171, 8.831, 8.5497, 8.1151, 7.9084, 7.5659, 7.1674, 6.9791, 6.665, 6.2769, 5.9907, 5.7131, 5.4087, 5.1498]
-# for index: 39 the time array is 
-prog2 = [5.1498, 4.9016, 4.5934, 4.2871]
-prog = prog1+prog2
-
-#non prog
-# for index: 36 the time array is 
-nprog1 =[13.1338, 14.0909, 16.5159, 18.9491, 18.6721, 18.2342, 17.807, 17.2267, 16.8972, 16.5704, 16.2457, 16.0122, 15.6696, 15.3622, 15.1253, 14.7834, 14.5677, 14.2961, 13.9309, 13.6141, 13.2166, 13.0427, 12.7052, 12.3991, 12.0407, 11.7189, 11.4802, 11.0965, 10.7525, 10.444, 10.0743, 9.6769, 9.2973, 8.9339, 8.6153, 8.2189, 7.8931]
-# for index: 39 the time array is 
-nprog2 = [7.8931, 7.4263, 7.0412, 6.6338]
-nprog = nprog1+nprog2
-
-graph_time(nprog,prog)
+# To graph results:
+# Copy the generated lists from the files they are written to into this file
+# Call the graph_time method with the lists you copied in, in the correct order

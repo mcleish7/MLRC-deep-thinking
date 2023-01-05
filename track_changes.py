@@ -1,5 +1,5 @@
 """
-In this file there are unused methods this is to faciliate quick chnages to the use of the file in the future by other users
+In this file there are unused methods this is to faciliate quick chnages to its use in the future by other users
 """
 import pytorchfi as fi
 from pytorchfi.core import fault_injection
@@ -17,7 +17,7 @@ from easy_to_hard_plot import MazeDataset
 cuda_avil = True if torch.cuda.is_available() else False
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-def get_no_prog_net():
+def get_no_prog_net(path):
     """
     Gets the non progressive net with an alpha value of 0 and returns it in evaluation mode
 
@@ -25,14 +25,14 @@ def get_no_prog_net():
         Torch.nn: the non progressive neural net to solve mazes
     """
     net = getattr(models, "dt_net_2d")(width=128, in_channels=3, max_iters=30) # for Lao => not recall, alpha =0
-    state_dict = torch.load("batch_shells_maze/outputs/mazes_ablation/training-boughten-Lao/model_best.pth", map_location=device)
+    state_dict = torch.load(path, map_location=device)
     net = net.to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(state_dict["net"])
     net.eval()
     return net
 
-def get_prog_net():
+def get_prog_net(path):
     """
     Gets the progressive net with an alpha value of 1 and returns it in evaluation mode
 
@@ -40,14 +40,14 @@ def get_prog_net():
         Torch.nn: the progressive neural net to solve mazes
     """
     net = getattr(models, "dt_net_2d")(width=128, in_channels=3, max_iters=30) # for Cor => not recall, alpha =1
-    state_dict = torch.load("batch_shells_maze/outputs/mazes_ablation/training-distinct-Cornesha/model_best.pth", map_location=device)
+    state_dict = torch.load(path, map_location=device)
     net = net.to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(state_dict["net"])
     net.eval()
     return net
 
-def get_recall_prog_net():
+def get_recall_prog_net(path):
     """
     Gets the progressive recall net with an alpha value of 1 and returns it in evaluation mode
 
@@ -55,14 +55,14 @@ def get_recall_prog_net():
         Torch.nn: the progressive recall neural net to solve mazes
     """
     net = getattr(models, "dt_net_recall_2d")(width=128, in_channels=3, max_iters=30) # for Paden => recall, alpha =1
-    state_dict = torch.load("batch_shells_maze/outputs/mazes_ablation/training-abased-Paden/model_best.pth", map_location=device)
+    state_dict = torch.load(path, map_location=device)
     net = net.to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(state_dict["net"])
     net.eval()
     return net
 
-def get_recall_no_prog_net():
+def get_recall_no_prog_net(path):
     """
     Gets the non progressive recall net with an alpha value of 1 and returns it in evaluation mode
 
@@ -70,7 +70,7 @@ def get_recall_no_prog_net():
         Torch.nn: the non progressive recall neural net to solve mazes
     """
     net = getattr(models, "dt_net_recall_2d")(width=128, in_channels=3, max_iters=30) # for Col => recall, alpha =0
-    state_dict = torch.load("batch_shells_maze/outputs/mazes_ablation/training-algal-Collyn/model_best.pth", map_location=device)
+    state_dict = torch.load(path, map_location=device)
     net = net.to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(state_dict["net"])
@@ -231,11 +231,16 @@ width = 128
 height = width
 layer_types_input = [torch.nn.Conv2d]
 
+recall_prog_path = "batch_shells_maze/outputs/mazes_ablation/training-abased-Paden/model_best.pth" # DT-Recall-Prog path i.e alpha>0 and recall=True
+recall_path = "batch_shells_maze/outputs/mazes_ablation/training-algal-Collyn/model_best.pth" # DT-Recall path i.e. alpha=0 and recall=True
+prog_path = "batch_shells_maze/outputs/mazes_ablation/training-distinct-Cornesha/model_best.pth" # DT-Prog path i.e. alpha>0 and recall=False
+dt_path = "batch_shells_maze/outputs/mazes_ablation/training-boughten-Lao/model_best.pth" # DT path i.e. alpha=0 and recall=False
+
 # running a test on each of the 4 types of nets
-recall_prog_output = tester(get_recall_prog_net(),batch_size, channels, width, height, layer_types_input, input)
-recall_no_prog_output = tester(get_recall_no_prog_net(),batch_size, channels, width, height, layer_types_input, input)
-prog_output = tester(get_prog_net(),batch_size, channels, width, height, layer_types_input, input)
-no_prog_output = tester(get_no_prog_net(),batch_size, channels, width, height, layer_types_input, input)
+recall_prog_output = tester(get_recall_prog_net(recall_prog_path),batch_size, channels, width, height, layer_types_input, input)
+recall_no_prog_output = tester(get_recall_no_prog_net(recall_path),batch_size, channels, width, height, layer_types_input, input)
+prog_output = tester(get_prog_net(prog_path),batch_size, channels, width, height, layer_types_input, input)
+no_prog_output = tester(get_no_prog_net(dt_path),batch_size, channels, width, height, layer_types_input, input)
 
 def graph_norm_progress(arr1, arr2, arr3, arr4):
     """
@@ -253,7 +258,7 @@ def graph_norm_progress(arr1, arr2, arr3, arr4):
     plt.plot(arr3, linewidth = '2.0', label = "DT-Prog")
     plt.plot(arr4, linewidth = '2.0', label = "DT")
     plt.yscale('log') # makes the y axis exponential
-    plt.ylim([10**-8,10**15])
+    plt.ylim([10**-8,10**15]) # may need altering for specific models
     plt.title('Change in features over time')
     plt.xlabel('Test-Time iterations')
     plt.ylabel('Δφ')
