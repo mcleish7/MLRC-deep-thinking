@@ -109,20 +109,20 @@ to see the results in an easy-to-read format.
 The file called [make_schoop.py](deepthinking/data_analysis/make_schoop.py) will use those pivot tables to make plots of the accuracy at various iterations. Use it the same way as make_table.py to get a visualization of deep thinking behavior. For models that perform better with added iterations, we say that these curves "schoop" upwards, and therefore name these plots "schoopy plots."
 
 # Peturbation Testing
-We provide 'summary.py', this can be used to print a summary for a direcotry of 'test_model.py' runs to see peak accuracy values. This is very useful for filtering.
+We provide [summary.py](summary.py), this can be used to print a summary for a directory of 'test_model.py' runs to see peak accuracy values. This is very useful for filtering.
 
 ## Prefix Sums Peturbation Test
-In 'sums_petub.py', the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in launch/sums_peturb_experiments.sh.
-In 'sums_track_changes.py', the code tracks the number of changes on average to recover from a peturbation. The scripts and directions to use this file are in launch/sums_peturb_track_experiments.sh.
+In [sums_peturb.py](sums_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [sums_peturb_experiments.sh](launch/sums_peturb_experiments.sh).
+In [sums_track_changes.py](sums_track_changes.py), the code tracks the number of changes on average to recover from a peturbation. The scripts and directions to use this file are in [sums_peturb_track_experiments.sh](launch/sums_peturb_track_experiments.sh).
 
 ## Maze Peturbatin Test
-In 'sums_petub.py', the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in launch/maze_peturb_experiments.sh.
+In [maze_peturb.py](maze_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [mazes_peturb_experiments.sh](launch/mazes_peturb_experiments.sh ).
 
 ## Maze Measure Feature Change Test
-In 'track_changes.py', the code measures via the L2 norm the average chnage in features over each iteration. The scripts and directions to use this file are in launch/track_changes_experiments.sh.
+In [track_changes.py](track_changes.py), the code measures via the L2 norm the average chnage in features over each iteration. The scripts and directions to use this file are in [track_changes_experiments.sh](launch/track_changes_experiments.sh).
 
 # Asymptotic Alignment Score
-In "Path Independent Equilibrium Models Can Better Exploit Test-Time Computation", Anil et al introduce the Asymptotic Alignment score which measure path indepence. The 'AA_score.py' script calculates an Asymptotic Alignment score for the input model. The scripts and directions to use this file are in launch/AA_score_experiments.sh.
+In "Path Independent Equilibrium Models Can Better Exploit Test-Time Computation", Anil et al introduce the Asymptotic Alignment score which measures path independence. The [AA_score.py](AA_score.py) script calculates an Asymptotic Alignment score for the input model. The scripts and directions to use this file are in [AA_score_experiments.sh](launch/AA_score_experiments.sh).
 
 ### A Note on Our Metrics
 
