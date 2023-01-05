@@ -1,6 +1,5 @@
 """
     Code to produce AA scores for DT-models, changing parameters for the models is done in the exact same way as for training
-    Note: As the models are not in eval mode, the data used is the data in the train_data parameter
 """
 
 import torch
@@ -88,7 +87,6 @@ def compute_cross_pi(net, testloader, iters, problem, device):
     Returns:
         float: the AA score
     """
-    corrects = 0
     total = 0
 
     idx = 0
@@ -128,22 +126,19 @@ def main(cfg: DictConfig):
     Computes the Asymptotic Alignment score (AA score) for each model in the filepaths list and writes this to a file
 
     Args:
-        cfg (DictConfig): Uses the hydra framework like the rest of the codebase to take command line arguments
+        cfg (DictConfig): Uses the hydra framework like the rest of the codebase from Bansal et al to take command line arguments
     """
     problem = cfg.problem
     loaders = dt.utils.get_dataloaders(problem)
-    # print(type(loaders["test"]))
 
-    cwd = os.getcwd()
-    # print("cwd is ",cwd)
-    os.chdir('../../..')
-    cwd = os.getcwd()
-    # print("cwd is ",cwd)
-    testloader = loaders["test"]#[loaders["test"], loaders["val"], loaders["train"]]
+    os.chdir('../../..') # as we have created an instace we are in the file for that instance
+
+    testloader = loaders["test"] # uses the test input paramater data
     device = "cuda" if torch.cuda.is_available() else "cpu"
     iters = 300
     aa = []
-    filepaths = [] #Add your file paths here e.g. 
+    filepaths = [] # Add your file paths here, remember they must all be for the same problem, e.g. prefix sums, this must match the command line argument given.
+    # EXAMPLE: filepaths = [outputs/prefix_sums_ablation/training-unbalanced-Nick/model_best.pth]
     for path in filepaths:
         if problem.name == "prefix_sums":
             net = get_sums_net(device, path)

@@ -116,7 +116,7 @@ We report (print and save) three quantities for accuracy: `train_acc` refers to 
 We provide [summary.py](summary.py), this can be used to print a summary for a directory of 'test_model.py' runs to see peak accuracy values. This is very useful for filtering.
 
 ## Prefix Sums Peturbation Test
-In [sums_peturb.py](sums_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [sums_peturb_experiments.sh](launch/sums_peturb_experiments.sh).\\
+In [sums_peturb.py](sums_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [sums_peturb_experiments.sh](launch/sums_peturb_experiments.sh).\
 In [sums_track_changes.py](sums_track_changes.py), the code tracks the number of changes on average to recover from a peturbation. The scripts and directions to use this file are in [sums_peturb_track_experiments.sh](launch/sums_peturb_track_experiments.sh).
 
 ## Maze Peturbatin Test
