@@ -203,14 +203,14 @@ def main_module(filepaths, datapath, number=100):
 
 def main():
     parser = argparse.ArgumentParser(description="Analysis parser")
-    parser.add_argument('--filepaths', nargs='+', help='the path to each model', required=True)
+    parser.add_argument('--net_paths', nargs='+', help='the path to each model', required=True)
     parser.add_argument('--subsets', nargs='+', help='the size of the subset of the 10,000 tests problems to test', required=True)
     parser.add_argument("--data_path", type=str, help="the path to the directory the data to test on is stored in", required=True) #e.g. data
     args = parser.parse_args()
 
     ns = args.subsets # list with each item the number of examples to test over
     for n in ns:
-        main_module(args.filepaths, args.data_path, number = n)
+        main_module(args.net_paths, args.data_path, number = n)
 
 if __name__ == "__main__":
     main()
