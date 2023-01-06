@@ -60,7 +60,6 @@ def get_schoopy_plot_alpha_colour(table, error_bars=True):
     fig, ax = plt.subplots(figsize=(20, 9))
 
     models = set(table.model)
-    test_datas = set(table.test_data)
     alphas = set(table.alpha)
 
     sns.lineplot(data=table,
@@ -69,7 +68,6 @@ def get_schoopy_plot_alpha_colour(table, error_bars=True):
                  hue="alpha",
                  linewidth = 3.0,
                  sizes=(2, 8),
-                 style="test_data" if len(test_datas) > 1 else None,
                  palette='bright',
                  dashes=True,
                  units=None,
@@ -78,7 +76,6 @@ def get_schoopy_plot_alpha_colour(table, error_bars=True):
 
     if error_bars and "test_acc_sem" in table.keys():
         for model in models:
-            for test_data in test_datas:
                 for alpha in alphas:
                     data = table[(table.model == model) &
                                  (table.test_data == test_data) &
