@@ -63,7 +63,7 @@ class DTNet(nn.Module):
             self.width = planes * block.expansion
         return nn.Sequential(*layers)
 
-    def forward(self, x, iters_to_do, interim_thought=None, **kwargs):
+    def forward(self, x, iters_to_do=300, interim_thought=None, **kwargs):
         initial_thought = self.projection(x)
 
         if interim_thought is None:

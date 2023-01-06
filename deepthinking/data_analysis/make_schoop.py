@@ -55,6 +55,39 @@ def get_schoopy_plot(table, error_bars=True):
     ax.fill_between([0, tr], [105, 105], alpha=0.3, label="Training Regime")
     return ax
 
+def get_schoopy_plot_alpha_colour(table, error_bars=True):
+    # Makes the line colour and legend relate to the alpha value instead of relating to the model
+    fig, ax = plt.subplots(figsize=(20, 9))
+
+    models = set(table.model)
+    alphas = set(table.alpha)
+
+    sns.lineplot(data=table,
+                 x="test_iter",
+                 y="test_acc_mean",
+                 hue="alpha",
+                 linewidth = 3.0,
+                 sizes=(2, 8),
+                 palette='bright',
+                 dashes=True,
+                 units=None,
+                 legend="auto",
+                 ax=ax)
+
+    if error_bars and "test_acc_sem" in table.keys():
+        for model in models:
+                for alpha in alphas:
+                    data = table[(table.model == model) &
+                                 (table.test_data == test_data) &
+                                 (table.alpha == alpha)]
+                    plt.fill_between(data.test_iter,
+                                     data.test_acc_mean - data.test_acc_sem,
+                                     data.test_acc_mean + data.test_acc_sem,
+                                     alpha=0.1, color="k")
+
+    tr = table.max_iters.max()  # training regime number
+    ax.fill_between([0, tr], [105, 105], alpha=0.3, label="Training Regime")
+    return ax
 
 def main():
     parser = argparse.ArgumentParser(description="Analysis parser")
@@ -74,6 +107,7 @@ def main():
     parser.add_argument("--min", action="store_true", help="add min values too table?")
     parser.add_argument("--xlim", type=float, nargs="+", default=None, help="x limits for plotting")
     parser.add_argument("--ylim", type=float, nargs="+", default=None, help="y limits for plotting")
+    parser.add_argument("--colour_by_alpha", type=bool, default=False, help="makes the colour of the lines relate to the alpha used instead of width")
     args = parser.parse_args()
 
     if args.plot_name is None:
@@ -98,7 +132,10 @@ def main():
     table.columns.name = None
     table = table.reset_index()
     print(table.round(2).to_markdown())
-    ax = get_schoopy_plot(table)
+    if args.colour_by_alpha == True:
+        ax = get_schoopy_plot_alpha_colour(table)
+    else:
+        ax = get_schoopy_plot(table)
 
     ax.legend(fontsize=26, loc="upper left", bbox_to_anchor=(1.0, 0.8))
     x_max = table.test_iter.max()

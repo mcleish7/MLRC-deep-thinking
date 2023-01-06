@@ -112,6 +112,22 @@ The file called [make_schoop.py](deepthinking/data_analysis/make_schoop.py) will
 
 We report (print and save) three quantities for accuracy: `train_acc` refers to the accuracy on the specific data used for training, `val_acc` refers to the accuracy on a held-out set from the same distribution as the data used for training, and `test_acc` refers to the accuracy on the test data (specified with a command line argument), which can be harder/larger problems.
 
+# Peturbation Testing
+We provide [summary.py](summary.py), this can be used to print a summary for a directory of 'test_model.py' runs to see peak accuracy values. This is very useful for filtering.
+
+## Prefix Sums Peturbation Test
+In [sums_peturb.py](sums_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [sums_peturb_experiments.sh](launch/sums_peturb_experiments.sh).\
+In [sums_track_changes.py](sums_track_changes.py), the code tracks the number of changes on average to recover from a peturbation. The scripts and directions to use this file are in [sums_peturb_track_experiments.sh](launch/sums_peturb_track_experiments.sh).
+
+## Maze Peturbatin Test
+In [maze_peturb.py](maze_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [mazes_peturb_experiments.sh](launch/mazes_peturb_experiments.sh ).
+
+## Maze Measure Feature Change Test
+In [track_changes.py](track_changes.py), the code measures via the L2 norm the average chnage in features over each iteration. The scripts and directions to use this file are in [track_changes_experiments.sh](launch/track_changes_experiments.sh).
+
+# Asymptotic Alignment Score
+In "Path Independent Equilibrium Models Can Better Exploit Test-Time Computation", Anil et al introduce the Asymptotic Alignment score which measures path independence. The [AA_score.py](AA_score.py) script calculates an Asymptotic Alignment score for the input model. The scripts and directions to use this file are in [AA_score_experiments.sh](launch/AA_score_experiments.sh).
+
 ## Development
 
 ### Adding Training and Testing Modes
@@ -133,4 +149,3 @@ To then train or test models using the new dataset, you can use the `problem= <n
 ## Contributing
 
 We believe in open-source community driven software development. Please open issues and pull requests with any questions or improvements you have.
-
