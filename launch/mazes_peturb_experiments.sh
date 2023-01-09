@@ -11,7 +11,7 @@
 #     Is an integer <=10,000
 
 # EXAMPLE:
-# python maze_peturb.py --net_paths outputs/mazes_ablation/training-unbalanced-Nick/model_best.pth outputs/mazes_ablation/training-dotted-Liam/model_best.pth --data_path data --subsets 5000 10000
+# python ../maze_peturb.py --net_paths outputs/mazes_ablation/training-unbalanced-Nick/model_best.pth outputs/mazes_ablation/training-dotted-Liam/model_best.pth --data_path data --subsets 5000 10000
 
 # Complete next line with your parameters:
-python maze_peturb.py --net_paths --data_path --subsets
+python ../maze_peturb.py --net_paths --data_path --subsets
