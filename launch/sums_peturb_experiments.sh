@@ -12,4 +12,4 @@
 # python sums_peturb.py --net_path outputs/prefix_sums_ablation/training-unbalanced-Nick/model_best.pth --data_path data --size 512
 
 # Complete next line with your parameters:
-python sums_peturb.py --net_path --data_path --size
+python ../sums_peturb.py --net_path --data_path --size

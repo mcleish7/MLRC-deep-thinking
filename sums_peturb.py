@@ -38,8 +38,9 @@ def get_data(device, path, size):
     Returns:
         input, target (tensor,tensor): the input and taget datasets as tensors on the device passed in
     """
-    data_path = path + "/" + str(size) + "_data.pth"
-    target_path = path + "/" + str(size) + "_targets.pth"
+    path = path + "/prefix_sums_data/"
+    data_path = path + str(size) + "_data.pth"
+    target_path = path + str(size) + "_targets.pth"
     data = torch.load(data_path).unsqueeze(1) - 0.5 #to account for batching and normalisation in real net
     target = torch.load(target_path)
     input = data.to(device, dtype=torch.float)
@@ -236,9 +237,8 @@ def main():
                 average.append(count_to_correct(inj_output,target))
             mean = sum(average) / len(average)
             time.append(mean)
-            name = f"time_list_tracker_{args.which_net}.txt"
-            file_path = os.path.join("test_time",name)
-            with open(file_path, 'w+') as f: # storing the data as we do not expect reach the end of the loop in the set runtime
+            name = f"sums_peturb_tracker.txt"
+            with open(name, 'w+') as f: # storing the data as we do not expect reach the end of the loop in the set runtime
                 f.write(f"for index: {index} the time array is {time}")
 
 if __name__ == "__main__":

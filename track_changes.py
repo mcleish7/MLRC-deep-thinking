@@ -13,6 +13,7 @@ import json
 import matplotlib.pyplot as plt
 from easy_to_hard_plot import plot_maze
 from easy_to_hard_plot import MazeDataset
+import argparse
 
 cuda_avil = True if torch.cuda.is_available() else False
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -77,7 +78,7 @@ def get_recall_no_prog_net(path):
     net.eval()
     return net
 
-def get_data():
+def get_data(path):
     """
     Gets the raw maze data from their local file
 
@@ -86,8 +87,10 @@ def get_data():
          1) the full  input data set as a Torch.tensor
          2) the full target data set as a Torch.tensor
     """
-    data = np.load("batch_reproduce_5/data/maze_data_test_13/inputs.npy")
-    target = np.load("batch_reproduce_5/data/maze_data_test_13/solutions.npy")
+    data_path = path + "/maze_data_test_13/inputs.npy"
+    target_path = path + "/maze_data_test_13/solutions.npy"
+    data = np.load(data_path)
+    target = np.load(target_path)
     a = data[1]
     a = torch.from_numpy(a)
     input = a.to(device, dtype=torch.float).unsqueeze(0) #to account for batching in real net
@@ -223,18 +226,23 @@ def tester(net, batch_size, channels, width, height, layer_types_input, input):
 
         return inj(input)
 
+parser = argparse.ArgumentParser(description="Time parser")
+# e.g. data/
+parser.add_argument("--data_path", type=str, help="the path to the directory the data to test on is stored in", required=True)
+args = parser.parse_args()
+
 #parameters for PyTorchFI to funciton
-input, target = get_data()
+input, target = get_data(args.data_path)
 batch_size = 1
 channels = 3
 width = 128
 height = width
 layer_types_input = [torch.nn.Conv2d]
 
-recall_prog_path = "batch_shells_maze/outputs/mazes_ablation/training-abased-Paden/model_best.pth" # DT-Recall-Prog path i.e alpha>0 and recall=True
-recall_path = "batch_shells_maze/outputs/mazes_ablation/training-algal-Collyn/model_best.pth" # DT-Recall path i.e. alpha=0 and recall=True
-prog_path = "batch_shells_maze/outputs/mazes_ablation/training-distinct-Cornesha/model_best.pth" # DT-Prog path i.e. alpha>0 and recall=False
-dt_path = "batch_shells_maze/outputs/mazes_ablation/training-boughten-Lao/model_best.pth" # DT path i.e. alpha=0 and recall=False
+recall_prog_path = "outputs/mazes_13x13/training-repand-Natilee/model_best.pth" # DT-Recall-Prog path i.e alpha>0 and recall=True
+recall_path = "outputs/mazes_13x13/training-smuggest-Bo/model_best.pth" # DT-Recall path i.e. alpha=0 and recall=True
+prog_path = "outputs/mazes_13x13/training-wasted-Devonne/model_best.pth" # DT-Prog path i.e. alpha>0 and recall=False
+dt_path = "outputs/mazes_13x13/training-desired-Eustacia/model_best.pth" # DT path i.e. alpha=0 and recall=False
 
 # running a test on each of the 4 types of nets
 recall_prog_output = tester(get_recall_prog_net(recall_prog_path),batch_size, channels, width, height, layer_types_input, input)
@@ -263,7 +271,7 @@ def graph_norm_progress(arr1, arr2, arr3, arr4):
     plt.xlabel('Test-Time iterations')
     plt.ylabel('Δφ')
     plt.legend(loc="upper right")
-    save_path = os.path.join("test_noise_outputs","test_changes_correctness.png")
+    save_path = "test_changes_correctness.png"
     plt.savefig(save_path)
 
 # Records the norm of the chnages of each net

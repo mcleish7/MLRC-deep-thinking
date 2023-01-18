@@ -7,4 +7,6 @@
 # prog_path = "batch_shells_maze/outputs/mazes_ablation/training-distinct-Cornesha/model_best.pth" # DT-Prog path i.e. alpha>0 and recall=False
 # dt_path = "batch_shells_maze/outputs/mazes_ablation/training-boughten-Lao/model_best.pth" # DT path i.e. alpha=0 and recall=False
 
-python ../track_changes.py
+# e.g. --data_path=data
+
+python ../track_changes.py --data_path=

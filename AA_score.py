@@ -137,8 +137,8 @@ def main(cfg: DictConfig):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     iters = 300
     aa = []
-    filepaths = [] # Add your file paths here, remember they must all be for the same problem, e.g. prefix sums, this must match the command line argument given.
-    # EXAMPLE: filepaths = [outputs/prefix_sums_ablation/training-unbalanced-Nick/model_best.pth]
+    filepaths = ["outputs/mazes_13x13/training-smuggest-Bo/model_best.pth", "outputs/mazes_13x13/training-repand-Natilee/model_best.pth"] # Add your file paths here, remember they must all be for the same problem, e.g. prefix sums, this must match the command line argument given.
+    # EXAMPLE: filepaths = ["outputs/prefix_sums_ablation/training-unbalanced-Nick/model_best.pth"]
     for path in filepaths:
         if problem.name == "prefix_sums":
             net = get_sums_net(device, path)
@@ -147,7 +147,6 @@ def main(cfg: DictConfig):
         else:
             net = get_chess_net(device, path)
         aa_score = compute_cross_pi(net, testloader, iters, problem, device).tolist()
-        print(f"for model on path {path}, the AA score is {aa_score[0]}")
         aa.append(aa_score)
 
     file_name = f"score_{problem.name}_{problem.train_data}.txt"

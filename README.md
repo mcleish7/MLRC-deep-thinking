@@ -36,7 +36,7 @@ To cite our work, please reference the appropriate paper.
 ## Getting Started
 
 ### Requirements
-This code was developed and tested with Python 3.8.2.
+This code was developed and tested with Python 3.9.13.
 
 To install requirements:
 

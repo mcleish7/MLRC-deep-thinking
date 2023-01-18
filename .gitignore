@@ -133,3 +133,16 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+launch/kudu.sh
+launch/kudu.out
+launch/kudu.err
+launch/kudu_2.sh
+launch/kudu_2.out
+launch/kudu_2.err
+launch/kudu_3.sh
+launch/kudu_3.out
+launch/kudu_3.err
+
+*.txt
+!requirements.txt

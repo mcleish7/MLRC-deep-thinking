@@ -210,7 +210,7 @@ def main():
 
     ns = args.subsets # list with each item the number of examples to test over
     for n in ns:
-        main_module(args.net_paths, args.data_path, number = n)
+        main_module(args.net_paths, args.data_path, number = int(n))
 
 if __name__ == "__main__":
     main()

@@ -38,8 +38,9 @@ def get_data(device, path, size):
     Returns:
         input, target (tensor,tensor): the input and taget datasets as tensors on the device passed in
     """
-    data_path = path + "/" + str(size) + "_data.pth"
-    target_path = path + "/" + str(size) + "_targets.pth"
+    path = path + "/prefix_sums_data/"
+    data_path = path + str(size) + "_data.pth"
+    target_path = path + str(size) + "_targets.pth"
     data = torch.load(data_path).unsqueeze(1) - 0.5 #to account for batching and normalisation in real net
     target = torch.load(target_path)
     input = data.to(device, dtype=torch.float)

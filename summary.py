@@ -5,7 +5,7 @@ import glob
 from tabulate import tabulate
 import pandas as pd
 
-filepaths = ["outputs/test_mazes"] # edit this list to add the directories with the tested models in
+filepaths = ["launch/outputs/prefix_sums_test"] # edit this list to add the directories with the tested models in
 
 count =0
 checkpoints = []
