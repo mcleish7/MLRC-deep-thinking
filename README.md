@@ -1,5 +1,5 @@
 # Deep Thinking Systems
-A centralized repository for deep thinking projects. Developed collaboratively by Avi Schwarzschild, Eitan Borgnia, Arpit Bansal, Zeyad Emam, and Jonas Geiping, all at the University of Maryland; then further developed by XXX from XXX. This repository contains the official implementation of DeepThinking Networks (DT nets), including architectures with recall and a training routine with the progressive loss term. Much of the structure of this repository is based on the code in [Easy-To-Hard](http://github.com/aks2203/easy-to-hard). In fact, this repository is capable of executing all the same experiments and should be used instead. Our work on thinking systems is availble in two papers:
+A centralized repository for deep thinking projects. Developed collaboratively by Avi Schwarzschild, Eitan Borgnia, Arpit Bansal, Zeyad Emam, and Jonas Geiping, all at the University of Maryland; then further developed by Sean McLeish and Long Tran-Thanh from the Universirty of Warwick. This repository contains the official implementation of DeepThinking Networks (DT nets), including architectures with recall and a training routine with the progressive loss term. Much of the structure of this repository is based on the code in [Easy-To-Hard](http://github.com/aks2203/easy-to-hard). In fact, this repository is capable of executing all the same experiments and should be used instead. Our work on thinking systems is availble in two papers:
 
 [End-to-end Algorithm Synthesis with Recurrent Networks: Logical Extrapolation Without Overthinking (NeurIPS '22)](https://arxiv.org/abs/2202.05826)
 
@@ -30,6 +30,16 @@ To cite our work, please reference the appropriate paper.
   journal={Advances in Neural Information Processing Systems},
   volume={34},
   year={2021}
+}
+```
+```
+@article{mcleish2021REendtoend,
+  title={[RE] End-to-end Algorithm Synthesis with Recurrent Networks: Logical Extrapolation Without Overthinking},
+  author={McLeish, Sean and Tran-Thanh, Long},
+  journal={ReScience C},
+  volume={9},
+  number={1},
+  year={2023}
 }
 ```
 
@@ -112,18 +122,19 @@ The file called [make_schoop.py](deepthinking/data_analysis/make_schoop.py) will
 
 We report (print and save) three quantities for accuracy: `train_acc` refers to the accuracy on the specific data used for training, `val_acc` refers to the accuracy on a held-out set from the same distribution as the data used for training, and `test_acc` refers to the accuracy on the test data (specified with a command line argument), which can be harder/larger problems.
 
-# Peturbation Testing
+# Perturbation Testing
+This code for perturbation testing and asymptotic alignment scores was added to the repository by Sean McLeish from the University of Warwick for the submission of "[RE] End-to-end Algorithm Synthesis with Recurrent Networks: Logical Extrapolation Without Overthinking" to the Machine Learning Reproducibility challenge 2022 published in ReScience C.
 We provide [summary.py](summary.py), this can be used to print a summary for a directory of 'test_model.py' runs to see peak accuracy values. This is very useful for filtering.
 
-## Prefix Sums Peturbation Test
-In [sums_peturb.py](sums_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [sums_peturb_experiments.sh](launch/sums_peturb_experiments.sh).\
-In [sums_track_changes.py](sums_track_changes.py), the code tracks the number of changes on average to recover from a peturbation. The scripts and directions to use this file are in [sums_peturb_track_experiments.sh](launch/sums_peturb_track_experiments.sh).
+## Prefix Sums Perturbation Test
+In [sums_peturb.py](sums_peturb.py), the code tracks the average time to recover from a perturbation. The scripts and directions to use this file are in [sums_peturb_experiments.sh](launch/sums_peturb_experiments.sh).\
+In [sums_track_changes.py](sums_track_changes.py), the code tracks the number of changes on average to recover from a perturbation. The scripts and directions to use this file are in [sums_peturb_track_experiments.sh](launch/sums_peturb_track_experiments.sh).
 
-## Maze Peturbatin Test
-In [maze_peturb.py](maze_peturb.py), the code tracks the average time to recover fom a petubration. The scripts and directions to use this file are in [mazes_peturb_experiments.sh](launch/mazes_peturb_experiments.sh ).
+## Maze Perturbation Test
+In [maze_peturb.py](maze_peturb.py), the code tracks the average time to recover from a perturbation. The scripts and directions to use this file are in [mazes_peturb_experiments.sh](launch/mazes_peturb_experiments.sh ).
 
 ## Maze Measure Feature Change Test
-In [track_changes.py](track_changes.py), the code measures via the L2 norm the average chnage in features over each iteration. The scripts and directions to use this file are in [track_changes_experiments.sh](launch/track_changes_experiments.sh).
+In [track_changes.py](track_changes.py), the code measures via the L2 norm the average change in features over each iteration. The scripts and directions to use this file are in [track_changes_experiments.sh](launch/track_changes_experiments.sh).
 
 # Asymptotic Alignment Score
 In "Path Independent Equilibrium Models Can Better Exploit Test-Time Computation", Anil et al introduce the Asymptotic Alignment score which measures path independence. The [AA_score.py](AA_score.py) script calculates an Asymptotic Alignment score for the input model. The scripts and directions to use this file are in [AA_score_experiments.sh](launch/AA_score_experiments.sh).
